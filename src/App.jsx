@@ -165,12 +165,7 @@ function ZoneCard({ zone }) {
     { name: "Organic Matter", value: zone.om, unit: "%", status: zone.om < 2 ? "Low" : zone.om > 5 ? "High" : "Optimum" },
   ];
   return (
-    <div style={{ border: `1px solid ${MILL_BORDER}`, borderRadius: 10, overflow: "hidden", marginBottom: 16 }}>
-      <div style={{ background: MILL_GREEN, color: "white", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontWeight: 700, fontSize: 14 }}>Zone: {zone.sampleId}</span>
-        <span style={{ fontSize: 12, opacity: 0.85 }}>Lab #{zone.labNumber}</span>
-      </div>
-      <div style={{ padding: "12px 16px" }}>
+    <div style={{ padding: "12px 16px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 12 }}>
           {nutrients.map(n => (
             <div key={n.name} style={{ background: "#f7faf7", borderRadius: 7, padding: "8px 10px" }}>
@@ -191,7 +186,6 @@ function ZoneCard({ zone }) {
             ENR: {zone.enr}
           </span>
         </div>
-      </div>
     </div>
   );
 }
