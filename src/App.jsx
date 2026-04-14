@@ -306,7 +306,7 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
         <div className="print-show" style={{ display: "none", marginBottom: 20, paddingBottom: 14, borderBottom: "2px solid #1c3d20" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ fontWeight: 800, fontSize: 20, color: "#1c3d20" }}>The Mill</div>
-            <div style={{ fontSize: 13, color: "#444", marginTop: 2 }}>Soil Analysis Report · Waypoint Analytical</div>
+            <div style={{ fontSize: 13, color: "#444", marginTop: 2 }}>Soil Analysis Report</div>
           </div>
         </div>
 
@@ -442,7 +442,7 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
 
 // ─── main component ────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are an expert agronomist and soil fertility specialist working for The Mill, a family-owned agricultural retail store in Bel Air, MD. You analyze Waypoint Analytical soil reports and generate comprehensive, actionable plans for customers.
+const SYSTEM_PROMPT = `You are an expert agronomist and soil fertility specialist working for The Mill, a family-owned agricultural retail store in Bel Air, MD. You analyze soil lab reports and generate comprehensive, actionable plans for customers.
 
 You will receive a soil sample PDF and customer context. Return a JSON object ONLY with no markdown or preamble, matching this exact structure:
 
@@ -618,7 +618,7 @@ export default function MillSoilAgent() {
         <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, paddingBottom: 16, borderBottom: `2px solid ${MILL_GREEN}` }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: MILL_GREEN, margin: 0 }}>Soil Analysis Agent</h1>
-            <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill · Waypoint Analytical</p>
+            <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill</p>
           </div>
         </div>
         <ReportDetail
@@ -641,7 +641,7 @@ export default function MillSoilAgent() {
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, paddingBottom: 16, borderBottom: `2px solid ${MILL_GREEN}` }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: MILL_GREEN, margin: 0 }}>Soil Analysis Agent</h1>
-          <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill · Waypoint Analytical</p>
+          <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill</p>
         </div>
       </div>
 
@@ -668,7 +668,7 @@ export default function MillSoilAgent() {
       {/* ── STEP 1 — Upload (multi-file) ── */}
       {step === 1 && (
         <div>
-          <SectionHeader title="Upload Waypoint soil reports (PDF)" />
+          <SectionHeader title="Upload soil lab reports (PDF)" />
 
           {/* drop zone */}
           <div
@@ -692,7 +692,7 @@ export default function MillSoilAgent() {
             ) : (
               <>
                 <div style={{ fontWeight: 600, color: MILL_GREEN, fontSize: 14 }}>Drop PDFs here or click to browse</div>
-                <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>Waypoint Analytical reports — select one or multiple</div>
+                <div style={{ fontSize: 12, color: "#888", marginTop: 4 }}>Soil lab reports — select one or multiple</div>
               </>
             )}
             <input
