@@ -10,10 +10,10 @@ const MILL_SEAFOAM_LIGHT = "#d6ebe0";
 const MILL_BORDER = "#c8d8ca";
 
 const SEGMENTS = [
-  { id: "residential", label: "Residential", sub: "Homeowner lawn & garden", icon: "🏡" },
-  { id: "turf", label: "Turf / Contractor", sub: "Commercial turf management", icon: "⛳" },
-  { id: "equine", label: "Equine & Livestock", sub: "Pasture management", icon: "🐴" },
-  { id: "agronomy", label: "Agronomy", sub: "Row crop & farm fields", icon: "🌾" },
+  { id: "residential", label: "Residential", sub: "Homeowner lawn & garden" },
+  { id: "turf", label: "Turf / Contractor", sub: "Commercial turf management" },
+  { id: "equine", label: "Equine & Livestock", sub: "Pasture management" },
+  { id: "agronomy", label: "Agronomy", sub: "Row crop & farm fields" },
 ];
 
 const CONTEXT_FIELDS = {
@@ -215,7 +215,6 @@ function QueueRow({ item, onRemove }) {
       border: `1px solid ${MILL_BORDER}`,
       borderRadius: 7, marginBottom: 6,
     }}>
-      <span style={{ fontSize: 15 }}>📄</span>
       <span style={{ flex: 1, fontSize: 13, color: "#222", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
         {item.file.name}
       </span>
@@ -306,7 +305,7 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
         {/* ── print-only report header ── */}
         <div className="print-show" style={{ display: "none", marginBottom: 20, paddingBottom: 14, borderBottom: "2px solid #1c3d20" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ fontWeight: 800, fontSize: 20, color: "#1c3d20" }}>The Mill of Bel Air</div>
+            <div style={{ fontWeight: 800, fontSize: 20, color: "#1c3d20" }}>The Mill</div>
             <div style={{ fontSize: 13, color: "#444", marginTop: 2 }}>Soil Analysis Report · Waypoint Analytical</div>
           </div>
         </div>
@@ -443,7 +442,7 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
 
 // ─── main component ────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are an expert agronomist and soil fertility specialist working for The Mill of Bel Air, a family-owned agricultural retail store in Bel Air, MD. You analyze Waypoint Analytical soil reports and generate comprehensive, actionable plans for customers.
+const SYSTEM_PROMPT = `You are an expert agronomist and soil fertility specialist working for The Mill, a family-owned agricultural retail store in Bel Air, MD. You analyze Waypoint Analytical soil reports and generate comprehensive, actionable plans for customers.
 
 You will receive a soil sample PDF and customer context. Return a JSON object ONLY with no markdown or preamble, matching this exact structure:
 
@@ -617,12 +616,9 @@ export default function MillSoilAgent() {
     return (
       <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 720, margin: "0 auto", padding: "0 4px" }}>
         <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, paddingBottom: 16, borderBottom: `2px solid ${MILL_GREEN}` }}>
-          <div style={{ background: MILL_GREEN, borderRadius: 10, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: 22 }}>🌱</span>
-          </div>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: MILL_GREEN, margin: 0 }}>Soil Analysis Agent</h1>
-            <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill of Bel Air · Waypoint Analytical</p>
+            <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill · Waypoint Analytical</p>
           </div>
         </div>
         <ReportDetail
@@ -643,12 +639,9 @@ export default function MillSoilAgent() {
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, paddingBottom: 16, borderBottom: `2px solid ${MILL_GREEN}` }}>
-        <div style={{ background: MILL_GREEN, borderRadius: 10, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: 22 }}>🌱</span>
-        </div>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: MILL_GREEN, margin: 0 }}>Soil Analysis Agent</h1>
-          <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill of Bel Air · Waypoint Analytical</p>
+          <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill · Waypoint Analytical</p>
         </div>
       </div>
 
@@ -661,7 +654,6 @@ export default function MillSoilAgent() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
             {SEGMENTS.map(s => (
               <div key={s.id} style={segStyle(segment === s.id)} onClick={() => setSegment(s.id)}>
-                <span style={{ fontSize: 24, display: "block", marginBottom: 6 }}>{s.icon}</span>
                 <div style={{ fontWeight: 700, fontSize: 14, color: MILL_GREEN }}>{s.label}</div>
                 <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>{s.sub}</div>
               </div>
@@ -690,7 +682,6 @@ export default function MillSoilAgent() {
             onDrop={onDrop}
             onDragOver={e => e.preventDefault()}
           >
-            <div style={{ fontSize: 32, marginBottom: 10 }}>{queue.length > 0 ? "📂" : "📄"}</div>
             {queue.length > 0 ? (
               <>
                 <div style={{ fontWeight: 700, color: MILL_GREEN, fontSize: 14 }}>
@@ -746,7 +737,6 @@ export default function MillSoilAgent() {
               {queue.map((item, i) => (
                 <div key={item.id} style={{ border: `1px solid ${MILL_BORDER}`, borderRadius: 10, marginBottom: 16, overflow: "hidden" }}>
                   <div style={{ background: MILL_GREEN_LIGHT, borderBottom: `1px solid ${MILL_BORDER}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 14 }}>📄</span>
                     <span style={{ fontWeight: 700, fontSize: 13, color: MILL_GREEN, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {item.file.name}
                     </span>
@@ -800,7 +790,6 @@ export default function MillSoilAgent() {
                 </div>
                 {queue.map(item => (
                   <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", background: "#f9faf9", border: `1px solid ${MILL_BORDER}`, borderRadius: 6, marginBottom: 4 }}>
-                    <span style={{ fontSize: 13 }}>📄</span>
                     <span style={{ fontSize: 13, color: "#333", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.file.name}</span>
                   </div>
                 ))}
