@@ -258,30 +258,23 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media print {
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+
           .no-print { display: none !important; }
           .print-show { display: block !important; }
 
           body { margin: 0; font-family: Arial, sans-serif; font-size: 12px; color: #000; }
 
-          /* strip all screen backgrounds / colors so it prints clean B&W */
-          .print-content * {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .print-content [style*="background"] { background: white !important; }
-          .print-content [style*="color:"] { color: #000 !important; }
-          .print-content [style*="border"] { border-color: #bbb !important; }
-
-          /* zone header stays dark so it reads */
+          /* zone header — dark green */
           .zone-header { background: #1c3d20 !important; color: white !important; }
 
           /* section headers keep left accent */
           .section-header-bar { border-left: 3px solid #1c3d20 !important; }
 
-          /* annual program timing row */
+          /* annual program timing row — seafoam */
           .timing-header { background: #4a7c5e !important; color: white !important; }
 
-          /* product list header */
+          /* product list header — light green */
           .product-list-header { background: #eaf2eb !important; }
 
           /* page breaks */
