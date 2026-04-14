@@ -199,10 +199,11 @@ function ZoneCard({ zone }) {
 // ─── queue row ────────────────────────────────────────────────────────────────
 
 const QUEUE_STATUS = {
-  waiting:   { bg: "#f5f5f5",      color: "#666",    label: "Waiting" },
+  waiting:   { bg: "#f5f5f5",        color: "#666",    label: "Waiting" },
   analyzing: { bg: MILL_GREEN_LIGHT, color: MILL_GREEN, label: "Analyzing…" },
-  done:      { bg: "#e6f4ea",      color: "#1a5c28", label: "Done" },
-  error:     { bg: "#fdecea",      color: "#c0392b", label: "Error" },
+  receiving: { bg: MILL_GREEN_LIGHT, color: MILL_GREEN, label: "Receiving…" },
+  done:      { bg: "#e6f4ea",        color: "#1a5c28", label: "Done" },
+  error:     { bg: "#fdecea",        color: "#c0392b", label: "Error" },
 };
 
 function QueueRow({ item, onRemove }) {
@@ -575,10 +576,42 @@ export default function MillSoilAgent() {
             }],
           }),
         });
-        const data = await response.json();
-        const raw = data.content?.find(b => b.type === "text")?.text || "";
-        const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
-        updateQueueItem(item.id, { status: "done", result: parsed });
+
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("text/event-stream")) {
+          updateQueueItem(item.id, { status: "receiving" });
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let accumulated = "";
+          let buffer = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const data = line.slice(6).trim();
+              if (!data || data === "[DONE]") continue;
+              try {
+                const evt = JSON.parse(data);
+                if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
+                  accumulated += evt.delta.text;
+                }
+              } catch {}
+            }
+          }
+          const parsed = JSON.parse(accumulated.replace(/```json|```/g, "").trim());
+          updateQueueItem(item.id, { status: "done", result: parsed });
+        } else {
+          const data = await response.json();
+          const raw = data.content?.find(b => b.type === "text")?.text || "";
+          const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+          updateQueueItem(item.id, { status: "done", result: parsed });
+        }
       } catch (err) {
         updateQueueItem(item.id, { status: "error", error: err.message });
       }
@@ -600,8 +633,9 @@ export default function MillSoilAgent() {
 
   // ── derived ────────────────────────────────────────────────────────────────
 
-  const doneCount  = queue.filter(q => q.status === "done").length;
-  const errorCount = queue.filter(q => q.status === "error").length;
+  const doneCount   = queue.filter(q => q.status === "done").length;
+  const errorCount  = queue.filter(q => q.status === "error").length;
+  const isReceiving = queue.some(q => q.status === "receiving");
 
   // ── individual report view (replaces step 3 content) ─────────────────────
 
@@ -813,7 +847,7 @@ export default function MillSoilAgent() {
               <div style={{ padding: "14px 16px", background: MILL_GREEN_LIGHT, borderRadius: 8, display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 18, height: 18, flexShrink: 0, border: `2px solid ${MILL_GREEN}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
                 <span style={{ fontSize: 13, color: MILL_GREEN, fontWeight: 600 }}>
-                  Analyzing — please keep this tab open
+                  {isReceiving ? "Receiving analysis — please keep this tab open" : "Analyzing — please keep this tab open"}
                 </span>
               </div>
             </>
