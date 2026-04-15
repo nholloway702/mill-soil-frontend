@@ -619,6 +619,28 @@ export default function MillSoilAgent() {
           }
         }
 
+        // Handle 422 (AI returned invalid JSON) — retry once before giving up
+        if (response.status === 422) {
+          let errData = {};
+          try { errData = await response.json(); } catch {}
+          if (errData.raw) console.error(`[parse] AI returned invalid JSON for "${item.file.name}":`, errData.raw);
+          console.warn(`[fetch] 422 parse error for "${item.file.name}" — retrying once…`);
+          updateQueueItem(item.id, { status: "retrying" });
+          await new Promise(r => setTimeout(r, 3000));
+          try {
+            response = await attemptFetch();
+          } catch (retryErr) {
+            if (retryErr.name === "AbortError") throw new Error("Analysis timed out. Please try again.");
+            throw new Error("Cannot reach the analysis server. Please check your connection.");
+          }
+          if (response.status === 422) {
+            let errData2 = {};
+            try { errData2 = await response.json(); } catch {}
+            if (errData2.raw) console.error(`[parse] AI returned invalid JSON on retry for "${item.file.name}":`, errData2.raw);
+            throw new Error("Analysis failed — the AI returned an unexpected response. Please try again.");
+          }
+        }
+
         if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
         updateQueueItem(item.id, { status: "analyzing" });
