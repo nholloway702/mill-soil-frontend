@@ -198,6 +198,7 @@ const QUEUE_STATUS = {
   waiting:   { bg: "#f5f5f5",        color: "#666",    label: "Waiting" },
   analyzing: { bg: MILL_GREEN_LIGHT, color: MILL_GREEN, label: "Analyzing…" },
   receiving: { bg: MILL_GREEN_LIGHT, color: MILL_GREEN, label: "Receiving…" },
+  retrying:  { bg: MILL_GOLD_LIGHT,  color: MILL_GOLD,  label: "Retrying…" },
   done:      { bg: "#e6f4ea",        color: "#1a5c28", label: "Done" },
   error:     { bg: "#fdecea",        color: "#c0392b", label: "Error" },
 };
@@ -215,7 +216,7 @@ function QueueRow({ item, onRemove }) {
       <span style={{ flex: 1, fontSize: 13, color: "#222", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
         {item.file.name}
       </span>
-      {item.status === "analyzing" && (
+      {(item.status === "analyzing" || item.status === "retrying") && (
         <div style={{
           width: 14, height: 14, flexShrink: 0,
           border: `2px solid ${MILL_GREEN}`, borderTopColor: "transparent",
@@ -512,15 +513,30 @@ export default function MillSoilAgent() {
     const pdfs = Array.from(fileList).filter(f => f.type === "application/pdf");
     if (!pdfs.length) return;
     const items = await Promise.all(
-      pdfs.map(async (file, i) => ({
-        id: `${Date.now()}-${i}-${file.name}`,
-        file,
-        base64: await readFileAsBase64(file),
-        status: "waiting",
-        context: {},
-        result: null,
-        error: null,
-      }))
+      pdfs.map(async (file, i) => {
+        const base64 = await readFileAsBase64(file);
+        console.log(`[pdf] "${file.name}" base64 size: ${(base64.length / 1024).toFixed(1)} KB`);
+        if (base64.length > 5 * 1024 * 1024) {
+          return {
+            id: `${Date.now()}-${i}-${file.name}`,
+            file,
+            base64: null,
+            status: "error",
+            context: {},
+            result: null,
+            error: "This PDF is too large to process. Please try splitting it into smaller files.",
+          };
+        }
+        return {
+          id: `${Date.now()}-${i}-${file.name}`,
+          file,
+          base64,
+          status: "waiting",
+          context: {},
+          result: null,
+          error: null,
+        };
+      })
     );
     setQueue(prev => [...prev, ...items]);
   }, []);
@@ -544,6 +560,7 @@ export default function MillSoilAgent() {
     const snapshot = [...queue];
 
     for (const item of snapshot) {
+      if (item.status === "error") continue;
       updateQueueItem(item.id, { status: "analyzing" });
 
       const ctx = isAgronomy ? item.context : sharedContext;
@@ -556,25 +573,55 @@ export default function MillSoilAgent() {
 
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 4000,
-            system: SYSTEM_PROMPT,
-            messages: [{
-              role: "user",
-              content: [
-                { type: "document", source: { type: "base64", media_type: "application/pdf", data: item.base64 } },
-                { type: "text", text: userMsg },
-              ],
-            }],
-          }),
+        const requestBody = JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 4000,
+          system: SYSTEM_PROMPT,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "document", source: { type: "base64", media_type: "application/pdf", data: item.base64 } },
+              { type: "text", text: userMsg },
+            ],
+          }],
         });
+        console.log(`[fetch] Sending to: ${apiUrl}`);
+        console.log(`[fetch] "${item.file.name}" body size: ${(requestBody.length / 1024).toFixed(1)} KB`);
+
+        const attemptFetch = () => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+          return fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: requestBody,
+            signal: controller.signal,
+          }).finally(() => clearTimeout(timeoutId));
+        };
+
+        let response;
+        try {
+          response = await attemptFetch();
+        } catch (fetchErr) {
+          if (fetchErr.name === "AbortError") {
+            throw new Error("Analysis timed out. Please try again.");
+          }
+          console.warn(`[fetch] Network error for "${item.file.name}": ${fetchErr.message}. Retrying in 3s…`);
+          updateQueueItem(item.id, { status: "retrying" });
+          await new Promise(r => setTimeout(r, 3000));
+          try {
+            response = await attemptFetch();
+          } catch (retryErr) {
+            if (retryErr.name === "AbortError") {
+              throw new Error("Analysis timed out. Please try again.");
+            }
+            throw new Error("Cannot reach the analysis server. Please check your connection.");
+          }
+        }
 
         if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
+        updateQueueItem(item.id, { status: "analyzing" });
         const contentType = response.headers.get("content-type") || "";
         if (contentType.includes("text/event-stream")) {
           updateQueueItem(item.id, { status: "receiving" });
