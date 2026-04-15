@@ -9,6 +9,17 @@ const MILL_SEAFOAM = "#4a7c5e";
 const MILL_SEAFOAM_LIGHT = "#d6ebe0";
 const MILL_BORDER = "#c8d8ca";
 
+const STORES = [
+  { id: 1, name: "The Mill of Bel Air" },
+  { id: 2, name: "The Mill of Salisbury" },
+  { id: 3, name: "The Mill of Whiteford" },
+  { id: 4, name: "The Mill of Black Horse" },
+  { id: 6, name: "The Mill of Hereford" },
+  { id: 7, name: "The Mill of Hampstead" },
+  { id: 8, name: "The Mill of Red Lion" },
+  { id: 9, name: "The Mill of Kingstown" },
+];
+
 const SEGMENTS = [
   { id: "residential", label: "Residential", sub: "Homeowner lawn & garden" },
   { id: "turf", label: "Turf / Contractor", sub: "Commercial turf management" },
@@ -18,31 +29,34 @@ const SEGMENTS = [
 
 const CONTEXT_FIELDS = {
   residential: [
-    { key: "grass_type", label: "Grass type", placeholder: "e.g. Tall Fescue, Kentucky Bluegrass" },
-    { key: "lawn_size", label: "Lawn size (sq ft)", placeholder: "e.g. 8000" },
-    { key: "lawn_age", label: "Lawn condition", placeholder: "e.g. Established, New seeding, Renovation" },
-    { key: "goals", label: "Customer goals", placeholder: "e.g. Thicken turf, improve color, reduce weeds" },
+    { key: "grass_type", label: "Grass type", type: "select", options: ["Tall Fescue", "Kentucky Bluegrass", "Perennial Ryegrass", "Bermuda", "Zoysia", "Sun & Shade Mix", "Unknown"] },
+    { key: "lawn_condition", label: "Lawn condition", type: "select", options: ["Established / Healthy", "Established / Struggling", "Thin / Patchy", "New Seeding", "Renovation"] },
+    { key: "sun_exposure", label: "Sun exposure", type: "select", options: ["Full Sun", "Mostly Sun", "Mostly Shade", "Full Shade", "Mixed"] },
+    { key: "soil_type", label: "Soil type", type: "select", options: ["Clay", "Sandy", "Loam", "Unknown"] },
+    { key: "lawn_size", label: "Lawn size (sq ft)", type: "number", placeholder: "e.g. 8000" },
+    { key: "primary_goal", label: "Primary goal", type: "select", options: ["Thicken turf", "Improve color", "Weed control", "Full renovation", "Maintenance"] },
   ],
   turf: [
-    { key: "grass_type", label: "Turf type", placeholder: "e.g. Bermuda, Zoysia, Tall Fescue" },
-    { key: "area_size", label: "Area size (sq ft or acres)", placeholder: "e.g. 2 acres" },
-    { key: "use_type", label: "Use type", placeholder: "e.g. Athletic field, golf fairway, HOA common area" },
-    { key: "goals", label: "Program goals", placeholder: "e.g. Competition-ready, maintenance program, renovation" },
+    { key: "turf_type", label: "Turf type", type: "select", options: ["Tall Fescue", "Kentucky Bluegrass", "Perennial Ryegrass", "Bermuda", "Zoysia", "Athletic Mix", "Sun & Shade Mix", "Unknown"] },
+    { key: "property_type", label: "Property type", type: "select", options: ["Athletic field", "HOA common area", "Golf fairway", "Commercial landscape", "Residential route"] },
+    { key: "program_type", label: "Program type", type: "select", options: ["New install", "Renovation", "Maintenance", "Overseeding"] },
+    { key: "area_size", label: "Area size", type: "select", options: ["Under 1 acre", "1-5 acres", "5-10 acres", "10-25 acres", "25-50 acres", "50+ acres"] },
+    { key: "primary_goal", label: "Primary goal", type: "select", options: ["Thicken turf", "Improve color", "Weed control", "Full renovation", "Maintenance program"] },
   ],
   equine: [
-    { key: "pasture_size", label: "Total pasture acreage", placeholder: "e.g. 10 acres" },
-    { key: "num_fields", label: "Number of fields/paddocks", placeholder: "e.g. 3 fields" },
-    { key: "stock_type", label: "Type of livestock", placeholder: "e.g. Horses, cattle, goats, mixed" },
-    { key: "stocking_rate", label: "Stocking rate", placeholder: "e.g. 4 horses on 10 acres" },
-    { key: "pasture_condition", label: "Current pasture condition", placeholder: "e.g. Established stand, thin areas, needs renovation" },
-    { key: "goals", label: "Management goals", placeholder: "e.g. Improve stand density, hay production, reduce weeds, year-round grazing" },
+    { key: "stock_type", label: "Type of livestock", type: "select", options: ["Horses", "Cattle", "Sheep", "Goats", "Mixed"] },
+    { key: "pasture_size", label: "Total pasture acreage", type: "number", placeholder: "e.g. 10" },
+    { key: "num_fields", label: "Number of fields/paddocks", type: "number", placeholder: "e.g. 3" },
+    { key: "pasture_condition", label: "Pasture condition", type: "select", options: ["Good established stand", "Thin areas", "Needs renovation", "New seeding"] },
+    { key: "primary_goal", label: "Primary goal", type: "select", options: ["Grazing", "Hay production", "Mixed grazing and hay"] },
+    { key: "stocking_rate", label: "Stocking rate", type: "text", placeholder: "e.g. 4 horses on 10 acres" },
   ],
   agronomy: [
-    { key: "crop", label: "Intended crop", placeholder: "e.g. Corn, Soybeans, Winter Wheat, Hay, Alfalfa, Barley, Sorghum" },
-    { key: "acreage", label: "Field acreage", placeholder: "e.g. 45 acres" },
-    { key: "yield_goal", label: "Yield goal", placeholder: "e.g. 180 bu/ac corn, 50 bu/ac soybeans, 4 tons/ac hay" },
-    { key: "tillage", label: "Tillage system", placeholder: "e.g. No-till, conventional, strip-till" },
-    { key: "previous_crop", label: "Previous crop", placeholder: "e.g. Soybeans, Corn, Fallow" },
+    { key: "crop", label: "Intended crop", type: "select", options: ["Corn", "Soybeans", "Winter Wheat", "Barley", "Hay", "Alfalfa", "Sorghum", "Clover", "Sunflower", "Cover crop"] },
+    { key: "acreage", label: "Field acreage", type: "number", placeholder: "e.g. 45" },
+    { key: "yield_goal", label: "Yield goal", type: "text", placeholder: "e.g. 180 bu/ac corn, 4 tons/ac hay" },
+    { key: "tillage", label: "Tillage system", type: "select", options: ["No-till", "Conventional", "Strip-till", "Minimum till"] },
+    { key: "previous_crop", label: "Previous crop", type: "select", options: ["Corn", "Soybeans", "Winter Wheat", "Fallow", "Other"] },
   ],
 };
 
@@ -134,7 +148,7 @@ function SectionHeader({ title }) {
 }
 
 function ProgressBar({ step }) {
-  const steps = ["Segment", "Upload", "Context", "Analysis"];
+  const steps = ["Store", "Segment", "Upload", "Context", "Review", "Report"];
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 28 }}>
       {steps.map((s, i) => (
@@ -243,9 +257,119 @@ function QueueRow({ item, onRemove }) {
   );
 }
 
+// ─── context field (handles select / number / text) ───────────────────────────
+
+function ContextField({ field, value, onChange }) {
+  const label = (
+    <label style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN, display: "block", marginBottom: 5 }}>
+      {field.label}
+    </label>
+  );
+  if (field.type === "select") {
+    return (
+      <div>
+        {label}
+        <select style={inputStyle} value={value || ""} onChange={e => onChange(e.target.value)}>
+          <option value="">— select —</option>
+          {field.options.map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+  return (
+    <div>
+      {label}
+      <input
+        type={field.type || "text"}
+        style={inputStyle}
+        placeholder={field.placeholder || ""}
+        value={value || ""}
+        onChange={e => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+// ─── review step ──────────────────────────────────────────────────────────────
+
+function ReviewStep({ item, segmentLabel, storeName, onApprove, onReject }) {
+  const result = item.result;
+  const severityColor = (s) => s === "critical" ? "#c0392b" : s === "warning" ? "#e67e22" : "#27ae60";
+  const severityBg  = (s) => s === "critical" ? "#fdecea" : s === "warning" ? "#fef5e7" : "#eafaf1";
+
+  return (
+    <div>
+      <SectionHeader title="Review analysis before finalizing" />
+
+      {/* summary card */}
+      <div style={{ border: `1px solid ${MILL_BORDER}`, borderRadius: 10, overflow: "hidden", marginBottom: 20 }}>
+        <div style={{ background: MILL_GREEN, color: "white", padding: "12px 16px" }}>
+          <div style={{ fontWeight: 700, fontSize: 16 }}>{result.customer?.name}</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{result.customer?.address}</div>
+        </div>
+        <div style={{ padding: "12px 16px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, borderBottom: `1px solid ${MILL_BORDER}` }}>
+          <div>
+            <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Segment</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN }}>{segmentLabel}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Store</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN }}>{storeName || "—"}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Zones detected</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN }}>{result.zones?.length ?? 0}</div>
+          </div>
+        </div>
+        <div style={{ padding: "12px 16px" }}>
+          <div style={{ fontSize: 11, color: "#888", marginBottom: 4 }}>Executive summary</div>
+          <p style={{ fontSize: 13, color: "#333", lineHeight: 1.6, margin: 0 }}>{result.executiveSummary}</p>
+        </div>
+      </div>
+
+      {/* key findings */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ borderLeft: `3px solid ${MILL_GREEN}`, paddingLeft: 12, marginBottom: 12 }}>
+          <p style={{ fontWeight: 700, fontSize: 14, color: MILL_GREEN, margin: 0 }}>
+            Key findings ({result.keyFindings?.length ?? 0})
+          </p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {result.keyFindings?.map((f, i) => (
+            <div key={i} style={{ background: severityBg(f.severity), border: `1px solid ${severityColor(f.severity)}33`, borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 13, color: "#222", flex: 1 }}>{f.finding}</div>
+              <div style={{ display: "flex", gap: 6, alignItems: "center", marginLeft: 12 }}>
+                <span style={{ fontSize: 11, color: "#888" }}>{f.zone}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: severityColor(f.severity), background: severityBg(f.severity), border: `1px solid ${severityColor(f.severity)}44`, borderRadius: 4, padding: "2px 7px" }}>
+                  {f.severity}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* action buttons */}
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <button style={btnPrimary} onClick={onApprove}>
+          Looks good — generate full report →
+        </button>
+        <button
+          style={{ ...btnSecondary, color: "#c0392b", borderColor: "#c0392b" }}
+          onClick={onReject}
+        >
+          Something looks wrong — start over
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── individual report detail (with print support) ────────────────────────────
 
-function ReportDetail({ item, segmentLabel, onBack, onReset }) {
+function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
   const result = item.result;
   const severityColor = (s) => s === "critical" ? "#c0392b" : s === "warning" ? "#e67e22" : "#27ae60";
   const severityBg  = (s) => s === "critical" ? "#fdecea" : s === "warning" ? "#fef5e7" : "#eafaf1";
@@ -317,6 +441,9 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
           <div>
             <div style={{ fontWeight: 700, fontSize: 17 }}>{result.customer?.name}</div>
             <div style={{ fontSize: 13, opacity: 0.85, marginTop: 2 }}>{result.customer?.address}</div>
+            {storeName && (
+              <div style={{ fontSize: 12, opacity: 0.75, marginTop: 3 }}>{storeName}</div>
+            )}
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 12, opacity: 0.75 }}>Report #{result.customer?.reportNumber}</div>
@@ -505,16 +632,20 @@ You will receive a soil sample PDF and customer context. Return a JSON object ON
 }`;
 
 export default function MillSoilAgent() {
+  // step: 0=Store, 1=Segment, 2=Upload, 3=Context, 4=Analysis
   const [step, setStep] = useState(0);
+  const [selectedStore, setSelectedStore] = useState(null); // persists for session — not cleared on reset
   const [segment, setSegment] = useState(null);
   // queue: [{ id, file, base64, status, context, result, error }]
   const [queue, setQueue] = useState([]);
   const [sharedContext, setSharedContext] = useState({});
   const [processing, setProcessing] = useState(false);
-  const [activeReport, setActiveReport] = useState(null); // queue item being viewed
+  const [reviewItem, setReviewItem] = useState(null);  // item pending review before full report
+  const [activeReport, setActiveReport] = useState(null); // item showing full report
   const fileRef = useRef();
 
   const segmentLabel = SEGMENTS.find(s => s.id === segment)?.label || "";
+  const selectedStoreName = STORES.find(s => s.id === selectedStore)?.name || "";
   const fields = CONTEXT_FIELDS[segment] || [];
   const isAgronomy = segment === "agronomy";
 
@@ -565,7 +696,7 @@ export default function MillSoilAgent() {
   // ── batch analysis ─────────────────────────────────────────────────────────
 
   const runBatchAnalysis = async () => {
-    setStep(3);
+    setStep(4);
     setProcessing(true);
     // snapshot so loop indices are stable
     const snapshot = [...queue];
@@ -588,6 +719,7 @@ export default function MillSoilAgent() {
           model: "claude-sonnet-4-20250514",
           max_tokens: 4000,
           system: SYSTEM_PROMPT,
+          selectedStore: selectedStoreName,
           messages: [{
             role: "user",
             content: [
@@ -596,6 +728,7 @@ export default function MillSoilAgent() {
             ],
           }],
         });
+
         console.log(`[fetch] Sending to: ${apiUrl}`);
         console.log(`[fetch] "${item.file.name}" body size: ${(requestBody.length / 1024).toFixed(1)} KB`);
 
@@ -696,7 +829,7 @@ export default function MillSoilAgent() {
     setProcessing(false);
   };
 
-  // ── reset ──────────────────────────────────────────────────────────────────
+  // ── reset — preserves selectedStore for session ────────────────────────────
 
   const reset = () => {
     setStep(0);
@@ -704,7 +837,9 @@ export default function MillSoilAgent() {
     setQueue([]);
     setSharedContext({});
     setProcessing(false);
+    setReviewItem(null);
     setActiveReport(null);
+    // selectedStore intentionally preserved
   };
 
   // ── derived ────────────────────────────────────────────────────────────────
@@ -713,9 +848,9 @@ export default function MillSoilAgent() {
   const errorCount  = queue.filter(q => q.status === "error").length;
   const isReceiving = queue.some(q => q.status === "receiving");
 
-  // ── individual report view (replaces step 3 content) ─────────────────────
+  // ── full report view ───────────────────────────────────────────────────────
 
-  if (step === 3 && activeReport !== null) {
+  if (activeReport !== null) {
     return (
       <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 720, margin: "0 auto", padding: "0 4px" }}>
         <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, paddingBottom: 16, borderBottom: `2px solid ${MILL_GREEN}` }}>
@@ -724,11 +859,36 @@ export default function MillSoilAgent() {
             <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill</p>
           </div>
         </div>
+        <div className="no-print"><ProgressBar step={5} /></div>
         <ReportDetail
           item={activeReport}
           segmentLabel={segmentLabel}
+          storeName={selectedStoreName}
           onBack={() => setActiveReport(null)}
           onReset={reset}
+        />
+      </div>
+    );
+  }
+
+  // ── review step ────────────────────────────────────────────────────────────
+
+  if (reviewItem !== null) {
+    return (
+      <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 720, margin: "0 auto", padding: "0 4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24, paddingBottom: 16, borderBottom: `2px solid ${MILL_GREEN}` }}>
+          <div>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: MILL_GREEN, margin: 0 }}>Soil Analysis Agent</h1>
+            <p style={{ fontSize: 13, color: "#666", margin: 0 }}>The Mill</p>
+          </div>
+        </div>
+        <ProgressBar step={4} />
+        <ReviewStep
+          item={reviewItem}
+          segmentLabel={segmentLabel}
+          storeName={selectedStoreName}
+          onApprove={() => { setActiveReport(reviewItem); setReviewItem(null); }}
+          onReject={reset}
         />
       </div>
     );
@@ -750,8 +910,34 @@ export default function MillSoilAgent() {
 
       <ProgressBar step={step} />
 
-      {/* ── STEP 0 — Segment ── */}
+      {/* ── STEP 0 — Store selection ── */}
       {step === 0 && (
+        <div>
+          <SectionHeader title="Select your store" />
+          <div style={{ marginBottom: 20 }}>
+            <select
+              style={{ ...inputStyle, fontSize: 15, padding: "11px 14px" }}
+              value={selectedStore ?? ""}
+              onChange={e => setSelectedStore(e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="">— select a store —</option>
+              {STORES.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+          <button
+            style={{ ...btnPrimary, opacity: selectedStore ? 1 : 0.4 }}
+            disabled={!selectedStore}
+            onClick={() => setStep(1)}
+          >
+            Continue →
+          </button>
+        </div>
+      )}
+
+      {/* ── STEP 1 — Segment ── */}
+      {step === 1 && (
         <div>
           <SectionHeader title="Select customer segment" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
@@ -762,14 +948,17 @@ export default function MillSoilAgent() {
               </div>
             ))}
           </div>
-          <button style={{ ...btnPrimary, opacity: segment ? 1 : 0.4 }} disabled={!segment} onClick={() => setStep(1)}>
-            Continue →
-          </button>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button style={btnSecondary} onClick={() => setStep(0)}>← Back</button>
+            <button style={{ ...btnPrimary, opacity: segment ? 1 : 0.4 }} disabled={!segment} onClick={() => setStep(2)}>
+              Continue →
+            </button>
+          </div>
         </div>
       )}
 
-      {/* ── STEP 1 — Upload (multi-file) ── */}
-      {step === 1 && (
+      {/* ── STEP 2 — Upload (multi-file) ── */}
+      {step === 2 && (
         <div>
           <SectionHeader title="Upload soil lab reports (PDF)" />
 
@@ -818,11 +1007,11 @@ export default function MillSoilAgent() {
           )}
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button style={btnSecondary} onClick={() => { setStep(0); setQueue([]); }}>← Back</button>
+            <button style={btnSecondary} onClick={() => { setStep(1); setQueue([]); }}>← Back</button>
             <button
               style={{ ...btnPrimary, opacity: queue.length > 0 ? 1 : 0.4 }}
               disabled={queue.length === 0}
-              onClick={() => setStep(2)}
+              onClick={() => setStep(3)}
             >
               Continue →
             </button>
@@ -830,8 +1019,8 @@ export default function MillSoilAgent() {
         </div>
       )}
 
-      {/* ── STEP 2 — Context ── */}
-      {step === 2 && (
+      {/* ── STEP 3 — Context ── */}
+      {step === 3 && (
         <div>
           {isAgronomy ? (
             /* per-PDF context cards for Agronomy */
@@ -848,15 +1037,12 @@ export default function MillSoilAgent() {
                   <div style={{ padding: 16 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                       {fields.map(f => (
-                        <div key={f.key}>
-                          <label style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN, display: "block", marginBottom: 5 }}>{f.label}</label>
-                          <input
-                            style={inputStyle}
-                            placeholder={f.placeholder}
-                            value={item.context[f.key] || ""}
-                            onChange={e => updateQueueItem(item.id, { context: { ...item.context, [f.key]: e.target.value } })}
-                          />
-                        </div>
+                        <ContextField
+                          key={f.key}
+                          field={f}
+                          value={item.context[f.key] || ""}
+                          onChange={val => updateQueueItem(item.id, { context: { ...item.context, [f.key]: val } })}
+                        />
                       ))}
                     </div>
                   </div>
@@ -874,15 +1060,12 @@ export default function MillSoilAgent() {
               )}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 20 }}>
                 {fields.map(f => (
-                  <div key={f.key}>
-                    <label style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN, display: "block", marginBottom: 5 }}>{f.label}</label>
-                    <input
-                      style={inputStyle}
-                      placeholder={f.placeholder}
-                      value={sharedContext[f.key] || ""}
-                      onChange={e => setSharedContext(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    />
-                  </div>
+                  <ContextField
+                    key={f.key}
+                    field={f}
+                    value={sharedContext[f.key] || ""}
+                    onChange={val => setSharedContext(prev => ({ ...prev, [f.key]: val }))}
+                  />
                 ))}
               </div>
 
@@ -901,7 +1084,7 @@ export default function MillSoilAgent() {
           )}
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button style={btnSecondary} onClick={() => setStep(1)} disabled={processing}>← Back</button>
+            <button style={btnSecondary} onClick={() => setStep(2)} disabled={processing}>← Back</button>
             <button style={btnPrimary} onClick={runBatchAnalysis} disabled={processing}>
               Run Analysis ({queue.length} PDF{queue.length > 1 ? "s" : ""}) →
             </button>
@@ -909,8 +1092,8 @@ export default function MillSoilAgent() {
         </div>
       )}
 
-      {/* ── STEP 3 — Processing / Results list ── */}
-      {step === 3 && activeReport === null && (
+      {/* ── STEP 4 — Processing / Results list ── */}
+      {step === 4 && (
         <div>
           {processing ? (
             <>
@@ -946,8 +1129,8 @@ export default function MillSoilAgent() {
                             {item.result.zones?.length ?? 0} zone{(item.result.zones?.length ?? 0) !== 1 ? "s" : ""} · {segmentLabel}
                           </div>
                         </div>
-                        <button style={{ ...btnPrimary, flexShrink: 0, fontSize: 13, padding: "9px 18px" }} onClick={() => setActiveReport(item)}>
-                          View Report
+                        <button style={{ ...btnPrimary, flexShrink: 0, fontSize: 13, padding: "9px 18px" }} onClick={() => setReviewItem(item)}>
+                          Review →
                         </button>
                       </div>
                     );
