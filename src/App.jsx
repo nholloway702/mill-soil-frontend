@@ -256,6 +256,11 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        @page {
+          margin: 0.75in;
+          size: auto;
+        }
+
         @media print {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
 
@@ -286,7 +291,12 @@ function ReportDetail({ item, segmentLabel, onBack, onReset }) {
         <button style={btnSecondary} onClick={onBack}>← Back to results</button>
         <button
           style={{ ...btnPrimary, background: MILL_SEAFOAM }}
-          onClick={() => window.print()}
+          onClick={() => {
+            const originalTitle = document.title;
+            document.title = `The Mill Soil Analysis - ${result.customer?.name || 'Report'}`;
+            window.print();
+            document.title = originalTitle;
+          }}
         >
           Export PDF
         </button>
