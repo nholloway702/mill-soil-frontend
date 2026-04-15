@@ -38,10 +38,11 @@ const CONTEXT_FIELDS = {
     { key: "goals", label: "Management goals", placeholder: "e.g. Improve stand density, hay production, reduce weeds, year-round grazing" },
   ],
   agronomy: [
-    { key: "crop", label: "Crop / intended use", placeholder: "e.g. Corn, Soybeans, Winter Wheat, Hay" },
+    { key: "crop", label: "Intended crop", placeholder: "e.g. Corn, Soybeans, Winter Wheat, Hay, Alfalfa, Barley, Sorghum" },
     { key: "acreage", label: "Field acreage", placeholder: "e.g. 45 acres" },
-    { key: "yield_goal", label: "Yield goal", placeholder: "e.g. 180 bu/ac corn, 50 bu/ac soybeans" },
+    { key: "yield_goal", label: "Yield goal", placeholder: "e.g. 180 bu/ac corn, 50 bu/ac soybeans, 4 tons/ac hay" },
     { key: "tillage", label: "Tillage system", placeholder: "e.g. No-till, conventional, strip-till" },
+    { key: "previous_crop", label: "Previous crop", placeholder: "e.g. Soybeans, Corn, Fallow" },
   ],
 };
 
