@@ -30,10 +30,12 @@ const CONTEXT_FIELDS = {
     { key: "goals", label: "Program goals", placeholder: "e.g. Competition-ready, maintenance program, renovation" },
   ],
   equine: [
-    { key: "pasture_type", label: "Pasture grass type", placeholder: "e.g. Orchardgrass/clover mix, Tall Fescue" },
-    { key: "acreage", label: "Pasture acreage", placeholder: "e.g. 5 acres" },
-    { key: "stocking", label: "Stocking rate", placeholder: "e.g. 3 horses, mixed cattle/equine" },
-    { key: "goals", label: "Management goals", placeholder: "e.g. Improve stand density, reduce weeds, hay production" },
+    { key: "pasture_size", label: "Total pasture acreage", placeholder: "e.g. 10 acres" },
+    { key: "num_fields", label: "Number of fields/paddocks", placeholder: "e.g. 3 fields" },
+    { key: "stock_type", label: "Type of livestock", placeholder: "e.g. Horses, cattle, goats, mixed" },
+    { key: "stocking_rate", label: "Stocking rate", placeholder: "e.g. 4 horses on 10 acres" },
+    { key: "pasture_condition", label: "Current pasture condition", placeholder: "e.g. Established stand, thin areas, needs renovation" },
+    { key: "goals", label: "Management goals", placeholder: "e.g. Improve stand density, hay production, reduce weeds, year-round grazing" },
   ],
   agronomy: [
     { key: "crop", label: "Crop / intended use", placeholder: "e.g. Corn, Soybeans, Winter Wheat, Hay" },
