@@ -494,6 +494,73 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
           ))}
         </div>
 
+        {/* ── farm fertility summary (agronomy only) ── */}
+        {segmentLabel === "Agronomy" && result.farmSummaryTable?.rows?.length > 0 && (() => {
+          const tbl = result.farmSummaryTable;
+          const numKeys = ["ph", "lime", "n", "p2o5", "k2o", "mg", "s", "zn", "b"];
+          const cellBg = (key, val) => {
+            if (typeof val !== "number") return "transparent";
+            if (val === 0) return "#f0f0f0";
+            if (key === "n" && val > 200) return "#e6f4ea";
+            if (key === "p2o5" && val > 80) return "#e6f4ea";
+            if (key === "k2o" && val > 100) return "#e6f4ea";
+            return "transparent";
+          };
+          const cellColor = (key, val) => {
+            if (typeof val === "number" && val === 0) return "#bbb";
+            return "#222";
+          };
+          const rowKeys = ["field", "crop", "yieldGoal", "ph", "lime", "n", "p2o5", "k2o", "mg", "s", "zn", "b", "notes"];
+          return (
+            <div style={{ marginBottom: 20 }}>
+              <div className="section-header-bar" style={{ borderLeft: `3px solid ${MILL_GREEN}`, paddingLeft: 12, marginBottom: 16 }}>
+                <p style={{ fontWeight: 700, fontSize: 15, color: MILL_GREEN, margin: 0 }}>Farm fertility summary</p>
+              </div>
+              <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${MILL_BORDER}` }}>
+                <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 12, minWidth: 860 }}>
+                  <thead>
+                    <tr>
+                      {tbl.headers.map((h, i) => (
+                        <th key={i} style={{
+                          background: MILL_GREEN, color: "white", padding: "8px 10px",
+                          textAlign: "left", fontWeight: 700, whiteSpace: "nowrap",
+                          borderRight: i < tbl.headers.length - 1 ? "1px solid rgba(255,255,255,0.2)" : "none",
+                        }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tbl.rows.map((row, ri) => (
+                      <tr key={ri} style={{ background: ri % 2 === 0 ? "white" : "#fafcfa" }}>
+                        {rowKeys.map((key, ci) => {
+                          const val = row[key];
+                          const bg = cellBg(key, val);
+                          const col = cellColor(key, val);
+                          const isNotes = key === "notes";
+                          return (
+                            <td key={ci} style={{
+                              padding: "7px 10px",
+                              borderTop: `1px solid ${MILL_BORDER}`,
+                              borderRight: ci < rowKeys.length - 1 ? `1px solid ${MILL_BORDER}` : "none",
+                              background: bg,
+                              color: col,
+                              whiteSpace: isNotes ? "normal" : "nowrap",
+                              lineHeight: 1.4,
+                              maxWidth: isNotes ? 200 : undefined,
+                            }}>
+                              {val === 0 ? "—" : (val ?? "—")}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ── lime strategy ── */}
         <div style={{ marginBottom: 20 }}>
           <div className="section-header-bar" style={{ borderLeft: `3px solid ${MILL_GREEN}`, paddingLeft: 12, marginBottom: 16 }}>
@@ -516,20 +583,34 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
               </div>
               <div style={{ border: `1px solid ${MILL_BORDER}`, borderTop: "none", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
                 {timing.applications?.map((app, ai) => (
-                  <div key={ai} style={{ padding: "10px 14px", borderBottom: ai < timing.applications.length - 1 ? `1px solid ${MILL_BORDER}` : "none", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                    <div>
-                      <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Zone</div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN }}>{app.zone}</div>
+                  <div key={ai} style={{ padding: "10px 14px", borderBottom: ai < timing.applications.length - 1 ? `1px solid ${MILL_BORDER}` : "none" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: (app.method || app.notes) ? 8 : 0 }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Zone</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN }}>{app.zone}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Product</div>
+                        <div style={{ fontSize: 13, fontWeight: 600 }}>{app.product}</div>
+                        <div style={{ fontSize: 12, color: "#666" }}>{app.rate}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Purpose</div>
+                        <div style={{ fontSize: 12, color: "#444", lineHeight: 1.4 }}>{app.purpose}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Product</div>
-                      <div style={{ fontSize: 13, fontWeight: 600 }}>{app.product}</div>
-                      <div style={{ fontSize: 12, color: "#666" }}>{app.rate}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Purpose</div>
-                      <div style={{ fontSize: 12, color: "#444", lineHeight: 1.4 }}>{app.purpose}</div>
-                    </div>
+                    {(app.method || app.notes) && (
+                      <div style={{ display: "flex", gap: 20, paddingTop: 6, borderTop: `1px solid ${MILL_BORDER}55`, flexWrap: "wrap" }}>
+                        {app.method && (
+                          <div style={{ fontSize: 11, color: "#444" }}>
+                            <span style={{ fontWeight: 700, color: MILL_GREEN }}>Method: </span>{app.method}
+                          </div>
+                        )}
+                        {app.notes && (
+                          <div style={{ fontSize: 11, color: "#666", fontStyle: "italic", flex: 1 }}>{app.notes}</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -614,7 +695,9 @@ You will receive a soil sample PDF and customer context. Return a JSON object ON
           "zone": "string",
           "product": "string (use real Mill product names or common products like Jonathan Green, Scott's, Lebanon, Hi-Yield, etc.)",
           "rate": "string (e.g. 4 lbs per 1000 sq ft)",
-          "purpose": "string (1 short sentence why)"
+          "purpose": "string (1 short sentence why)",
+          "method": "string (optional — application method, e.g. broadcast incorporated, 2x2 in-furrow, UAN coulter injection. Omit or empty string for non-agronomy.)",
+          "notes": "string (optional — lab-specific comments or special instructions. Omit or empty string if none.)"
         }
       ]
     }
@@ -628,7 +711,28 @@ You will receive a soil sample PDF and customer context. Return a JSON object ON
       "purpose": "string"
     }
   ],
-  "customerNotes": "string - 2-3 sentences of plain English advice written directly to the customer. Warm and helpful tone."
+  "customerNotes": "string - 2-3 sentences of plain English advice written directly to the customer. Warm and helpful tone.",
+  "farmSummaryTable": {
+    "_note": "AGRONOMY SEGMENT ONLY — omit this field entirely for residential, turf, and equine reports.",
+    "headers": ["Field", "Crop", "Yield Goal", "pH", "Lime (tons/acre)", "N (lbs/acre)", "P2O5 (lbs/acre)", "K2O (lbs/acre)", "Mg (lbs/acre)", "S (lbs/acre)", "Zn (lbs/acre)", "B (lbs/acre)", "Notes"],
+    "rows": [
+      {
+        "field": "string — field/sample name",
+        "crop": "string — intended crop from lab rec table",
+        "yieldGoal": "string — yield goal from lab rec table",
+        "ph": "number — soil pH",
+        "lime": "number — tons/acre (0 if none needed)",
+        "n": "number — lbs N/acre",
+        "p2o5": "number — lbs P2O5/acre",
+        "k2o": "number — lbs K2O/acre",
+        "mg": "number — lbs Mg/acre (0 if none)",
+        "s": "number — lbs S/acre (0 if none)",
+        "zn": "number — lbs Zn/acre (0 if none)",
+        "b": "number — lbs B/acre (0 if none)",
+        "notes": "string — lab application comments for this field"
+      }
+    ]
+  }
 }`;
 
 export default function MillSoilAgent() {
