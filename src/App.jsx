@@ -21,10 +21,11 @@ const STORES = [
 ];
 
 const SEGMENTS = [
-  { id: "residential", label: "Residential", sub: "Homeowner lawn & garden" },
+  { id: "residential", label: "Residential", sub: "Homeowner lawn care — turf & grass only" },
   { id: "turf", label: "Turf / Contractor", sub: "Commercial turf management" },
   { id: "equine", label: "Equine & Livestock", sub: "Pasture management" },
   { id: "agronomy", label: "Agronomy", sub: "Row crop & farm fields" },
+  { id: "garden", label: "Garden", sub: "Vegetable gardens, flower beds, raised beds & ornamentals — not for lawn care", fullWidth: true },
 ];
 
 const CONTEXT_FIELDS = {
@@ -57,6 +58,14 @@ const CONTEXT_FIELDS = {
     { key: "yield_goal", label: "Yield goal", type: "text", placeholder: "e.g. 180 bu/ac corn, 4 tons/ac hay" },
     { key: "tillage", label: "Tillage system", type: "select", options: ["No-till", "Conventional", "Strip-till", "Minimum till"] },
     { key: "previous_crop", label: "Previous crop", type: "select", options: ["Corn", "Soybeans", "Winter Wheat", "Fallow", "Other"] },
+  ],
+  garden: [
+    { key: "garden_size", label: "Garden size (sq ft)", type: "number", placeholder: "e.g. 500" },
+    { key: "garden_type", label: "Type of garden", type: "select", options: ["Vegetable garden", "Flower bed", "Raised bed", "Mixed ornamental", "Herb garden", "Mixed vegetables & flowers"] },
+    { key: "crops", label: "What are you growing?", type: "text", placeholder: "e.g. Tomatoes, peppers, corn, mixed vegetables, perennials" },
+    { key: "tillage", label: "Tillage plan", type: "select", options: ["Yes — rototilling before planting", "No — no-till / direct seed", "Raised bed with new soil mix", "Lightly hand-worked"] },
+    { key: "soil_texture", label: "Soil texture", type: "select", options: ["Sandy / light", "Loam / average", "Clay / heavy", "Unknown"] },
+    { key: "goals", label: "Goals", type: "text", placeholder: "e.g. Improve yield, fix soil, starting new bed, organic preferred" },
   ],
 };
 
@@ -1046,8 +1055,12 @@ export default function MillSoilAgent() {
           <SectionHeader title="Select customer segment" />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
             {SEGMENTS.map(s => (
-              <div key={s.id} style={segStyle(segment === s.id)} onClick={() => setSegment(s.id)}>
-                <div style={{ fontWeight: 700, fontSize: 14, color: MILL_GREEN }}>{s.label}</div>
+              <div
+                key={s.id}
+                style={{ ...segStyle(segment === s.id), ...(s.fullWidth ? { gridColumn: "1 / -1" } : {}) }}
+                onClick={() => setSegment(s.id)}
+              >
+                <div style={{ fontWeight: 700, fontSize: 14, color: s.fullWidth ? MILL_SEAFOAM : MILL_GREEN }}>{s.label}</div>
                 <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>{s.sub}</div>
               </div>
             ))}
