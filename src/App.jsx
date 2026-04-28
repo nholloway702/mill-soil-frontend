@@ -378,8 +378,43 @@ function ReviewStep({ item, segmentLabel, storeName, onApprove, onReject }) {
 
 // ─── individual report detail (with print support) ────────────────────────────
 
-function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
+function ReportDetail({ item, segmentLabel, storeName, onBack, onReset, onSaveEdits }) {
   const result = item.result;
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(null);
+  const r = isEditing ? draft : result;
+
+  const startEdit  = () => { setDraft(JSON.parse(JSON.stringify(result))); setIsEditing(true); };
+  const cancelEdit = () => { setDraft(null); setIsEditing(false); };
+  const saveEdit   = () => { onSaveEdits(draft); setIsEditing(false); setDraft(null); };
+
+  const setField = (field, val) => setDraft(d => ({ ...d, [field]: val }));
+  const updateFinding = (i, val) => setDraft(d => ({
+    ...d, keyFindings: d.keyFindings.map((f, idx) => idx === i ? { ...f, finding: val } : f),
+  }));
+  const deleteFinding = (i) => setDraft(d => ({
+    ...d, keyFindings: d.keyFindings.filter((_, idx) => idx !== i),
+  }));
+  const updateApplication = (ti, ai, field, val) => setDraft(d => ({
+    ...d, annualProgram: d.annualProgram.map((t, tIdx) => tIdx !== ti ? t : {
+      ...t, applications: t.applications.map((a, aIdx) => aIdx !== ai ? a : { ...a, [field]: val }),
+    }),
+  }));
+  const updateProduct = (i, field, val) => setDraft(d => ({
+    ...d, productList: d.productList.map((p, idx) => idx !== i ? p : { ...p, [field]: val }),
+  }));
+
+  const editTA = {
+    width: "100%", fontSize: 14, lineHeight: 1.6, fontFamily: "inherit",
+    border: "1.5px solid #b8860b", borderRadius: 6, padding: "8px 10px",
+    resize: "vertical", background: "#fffef8", color: "#222", boxSizing: "border-box",
+  };
+  const editIn = {
+    width: "100%", fontSize: 13, fontFamily: "inherit",
+    border: "1.5px solid #b8860b", borderRadius: 4, padding: "4px 7px",
+    background: "#fffef8", color: "#222", boxSizing: "border-box",
+  };
+
   const severityColor = (s) => s === "critical" ? "#c0392b" : s === "warning" ? "#e67e22" : "#27ae60";
   const severityBg  = (s) => s === "critical" ? "#fdecea" : s === "warning" ? "#fef5e7" : "#eafaf1";
 
@@ -420,20 +455,40 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
       `}</style>
 
       {/* ── screen-only navigation ── */}
-      <div className="no-print" style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-        <button style={btnSecondary} onClick={onBack}>← Back to results</button>
-        <button
-          style={{ ...btnPrimary, background: MILL_SEAFOAM }}
-          onClick={() => {
-            const originalTitle = document.title;
-            document.title = `The Mill Soil Analysis - ${result.customer?.name || 'Report'}`;
-            window.print();
-            document.title = originalTitle;
-          }}
-        >
-          Export PDF
-        </button>
-        <button style={{ ...btnSecondary, marginLeft: "auto" }} onClick={onReset}>Start new analysis</button>
+      <div className="no-print" style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+        {!isEditing && <button style={btnSecondary} onClick={onBack}>← Back to results</button>}
+        {!isEditing && (
+          <button
+            style={{ ...btnPrimary, background: MILL_SEAFOAM }}
+            onClick={() => {
+              const originalTitle = document.title;
+              document.title = `The Mill Soil Analysis - ${result.customer?.name || 'Report'}`;
+              window.print();
+              document.title = originalTitle;
+            }}
+          >
+            Export PDF
+          </button>
+        )}
+        {!isEditing && (
+          <button style={{ ...btnPrimary, background: MILL_GOLD }} onClick={startEdit}>
+            Edit Report
+          </button>
+        )}
+        {isEditing && (
+          <>
+            <span style={{ fontSize: 13, fontWeight: 700, color: MILL_GOLD, border: `1.5px solid ${MILL_GOLD}`, borderRadius: 6, padding: "4px 12px" }}>
+              Editing
+            </span>
+            <button style={{ ...btnPrimary, background: MILL_GREEN }} onClick={saveEdit}>
+              Save Changes
+            </button>
+            <button style={btnSecondary} onClick={cancelEdit}>
+              Cancel
+            </button>
+          </>
+        )}
+        {!isEditing && <button style={{ ...btnSecondary, marginLeft: "auto" }} onClick={onReset}>Start new analysis</button>}
       </div>
 
       <div className="print-content">
@@ -464,7 +519,10 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
         {/* ── executive summary ── */}
         <div style={{ background: MILL_GOLD_LIGHT, border: `1px solid ${MILL_GOLD}`, borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
           <div style={{ fontWeight: 700, fontSize: 13, color: MILL_GOLD, marginBottom: 6 }}>EXECUTIVE SUMMARY</div>
-          <p style={{ fontSize: 14, color: "#3a2800", lineHeight: 1.6, margin: 0 }}>{result.executiveSummary}</p>
+          {isEditing
+            ? <textarea rows={5} style={editTA} value={draft.executiveSummary || ""} onChange={e => setField("executiveSummary", e.target.value)} />
+            : <p style={{ fontSize: 14, color: "#3a2800", lineHeight: 1.6, margin: 0 }}>{r.executiveSummary}</p>
+          }
         </div>
 
         {/* ── key findings ── */}
@@ -473,14 +531,25 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
             <p style={{ fontWeight: 700, fontSize: 15, color: MILL_GREEN, margin: 0 }}>Key findings</p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {result.keyFindings?.map((f, i) => (
-              <div key={i} style={{ background: severityBg(f.severity), border: `1px solid ${severityColor(f.severity)}33`, borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ fontSize: 13, color: "#222", flex: 1 }}>{f.finding}</div>
-                <div style={{ display: "flex", gap: 6, alignItems: "center", marginLeft: 12 }}>
+            {r.keyFindings?.map((f, i) => (
+              <div key={i} style={{ background: severityBg(f.severity), border: `1px solid ${severityColor(f.severity)}33`, borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                {isEditing
+                  ? <input style={{ ...editIn, flex: 1 }} value={f.finding} onChange={e => updateFinding(i, e.target.value)} />
+                  : <div style={{ fontSize: 13, color: "#222", flex: 1 }}>{f.finding}</div>
+                }
+                <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
                   <span style={{ fontSize: 11, color: "#888" }}>{f.zone}</span>
                   <span style={{ fontSize: 11, fontWeight: 700, color: severityColor(f.severity), background: severityBg(f.severity), border: `1px solid ${severityColor(f.severity)}44`, borderRadius: 4, padding: "2px 7px" }}>
                     {f.severity}
                   </span>
+                  {isEditing && (
+                    <button
+                      onClick={() => deleteFinding(i)}
+                      style={{ background: "#c0392b", color: "white", border: "none", borderRadius: 4, padding: "2px 8px", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -576,7 +645,10 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
             <p style={{ fontWeight: 700, fontSize: 15, color: MILL_GREEN, margin: 0 }}>Lime correction strategy</p>
           </div>
           <div style={{ background: "#f4f9f4", border: `1px solid ${MILL_BORDER}`, borderRadius: 8, padding: "14px 16px", fontSize: 14, lineHeight: 1.7, color: "#222" }}>
-            {result.limeStrategy}
+            {isEditing
+              ? <textarea rows={6} style={editTA} value={draft.limeStrategy || ""} onChange={e => setField("limeStrategy", e.target.value)} />
+              : r.limeStrategy
+            }
           </div>
         </div>
 
@@ -585,7 +657,7 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
           <div className="section-header-bar" style={{ borderLeft: `3px solid ${MILL_GREEN}`, paddingLeft: 12, marginBottom: 16 }}>
             <p style={{ fontWeight: 700, fontSize: 15, color: MILL_GREEN, margin: 0 }}>Annual application program</p>
           </div>
-          {result.annualProgram?.map((timing, ti) => (
+          {r.annualProgram?.map((timing, ti) => (
             <div key={ti} style={{ marginBottom: 14 }}>
               <div className="timing-header" style={{ background: MILL_SEAFOAM, color: "white", borderRadius: "8px 8px 0 0", padding: "8px 14px", fontWeight: 700, fontSize: 13 }}>
                 {timing.timing}
@@ -593,30 +665,51 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
               <div style={{ border: `1px solid ${MILL_BORDER}`, borderTop: "none", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
                 {timing.applications?.map((app, ai) => (
                   <div key={ai} style={{ padding: "10px 14px", borderBottom: ai < timing.applications.length - 1 ? `1px solid ${MILL_BORDER}` : "none" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: (app.method || app.notes) ? 8 : 0 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
                       <div>
                         <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Zone</div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: MILL_GREEN }}>{app.zone}</div>
                       </div>
                       <div>
                         <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Product</div>
-                        <div style={{ fontSize: 13, fontWeight: 600 }}>{app.product}</div>
-                        <div style={{ fontSize: 12, color: "#666" }}>{app.rate}</div>
+                        {isEditing ? (
+                          <>
+                            <input style={editIn} value={app.product || ""} onChange={e => updateApplication(ti, ai, "product", e.target.value)} />
+                            <input style={{ ...editIn, marginTop: 4 }} value={app.rate || ""} placeholder="Rate" onChange={e => updateApplication(ti, ai, "rate", e.target.value)} />
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ fontSize: 13, fontWeight: 600 }}>{app.product}</div>
+                            <div style={{ fontSize: 12, color: "#666" }}>{app.rate}</div>
+                          </>
+                        )}
                       </div>
                       <div>
                         <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Purpose</div>
-                        <div style={{ fontSize: 12, color: "#444", lineHeight: 1.4 }}>{app.purpose}</div>
+                        {isEditing
+                          ? <input style={editIn} value={app.purpose || ""} onChange={e => updateApplication(ti, ai, "purpose", e.target.value)} />
+                          : <div style={{ fontSize: 12, color: "#444", lineHeight: 1.4 }}>{app.purpose}</div>
+                        }
                       </div>
                     </div>
-                    {(app.method || app.notes) && (
-                      <div style={{ display: "flex", gap: 20, paddingTop: 6, borderTop: `1px solid ${MILL_BORDER}55`, flexWrap: "wrap" }}>
-                        {app.method && (
-                          <div style={{ fontSize: 11, color: "#444" }}>
-                            <span style={{ fontWeight: 700, color: MILL_GREEN }}>Method: </span>{app.method}
-                          </div>
-                        )}
-                        {app.notes && (
-                          <div style={{ fontSize: 11, color: "#666", fontStyle: "italic", flex: 1 }}>{app.notes}</div>
+                    {(isEditing || app.method || app.notes) && (
+                      <div style={{ display: "flex", gap: 12, paddingTop: 6, borderTop: `1px solid ${MILL_BORDER}55`, flexWrap: "wrap" }}>
+                        {isEditing ? (
+                          <>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 10, color: "#888", marginBottom: 2 }}>Method</div>
+                              <input style={editIn} value={app.method || ""} placeholder="Application method (optional)" onChange={e => updateApplication(ti, ai, "method", e.target.value)} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 10, color: "#888", marginBottom: 2 }}>Notes</div>
+                              <input style={editIn} value={app.notes || ""} placeholder="Notes (optional)" onChange={e => updateApplication(ti, ai, "notes", e.target.value)} />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {app.method && <div style={{ fontSize: 11, color: "#444" }}><span style={{ fontWeight: 700, color: MILL_GREEN }}>Method: </span>{app.method}</div>}
+                            {app.notes && <div style={{ fontSize: 11, color: "#666", fontStyle: "italic", flex: 1 }}>{app.notes}</div>}
+                          </>
                         )}
                       </div>
                     )}
@@ -638,12 +731,23 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
                 <div key={h} style={{ fontSize: 12, fontWeight: 700, color: MILL_GREEN }}>{h}</div>
               ))}
             </div>
-            {result.productList?.map((p, i) => (
+            {r.productList?.map((p, i) => (
               <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 2fr", padding: "10px 14px", gap: 8, borderTop: `1px solid ${MILL_BORDER}`, background: i % 2 === 0 ? "white" : "#fafcfa" }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>{p.product}</div>
-                <div style={{ fontSize: 12, color: "#555" }}>{p.type}</div>
-                <div style={{ fontSize: 12, color: MILL_GOLD, fontWeight: 600 }}>{p.estimatedQty}</div>
-                <div style={{ fontSize: 12, color: "#555" }}>{p.purpose}</div>
+                {isEditing ? (
+                  <>
+                    <input style={editIn} value={p.product || ""} onChange={e => updateProduct(i, "product", e.target.value)} />
+                    <input style={editIn} value={p.type || ""} onChange={e => updateProduct(i, "type", e.target.value)} />
+                    <input style={editIn} value={p.estimatedQty || ""} onChange={e => updateProduct(i, "estimatedQty", e.target.value)} />
+                    <input style={editIn} value={p.purpose || ""} onChange={e => updateProduct(i, "purpose", e.target.value)} />
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>{p.product}</div>
+                    <div style={{ fontSize: 12, color: "#555" }}>{p.type}</div>
+                    <div style={{ fontSize: 12, color: MILL_GOLD, fontWeight: 600 }}>{p.estimatedQty}</div>
+                    <div style={{ fontSize: 12, color: "#555" }}>{p.purpose}</div>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -652,7 +756,10 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset }) {
         {/* ── customer notes ── */}
         <div style={{ background: MILL_SEAFOAM_LIGHT, border: `1px solid ${MILL_SEAFOAM}`, borderRadius: 10, padding: "14px 18px", marginBottom: 24 }}>
           <div style={{ fontWeight: 700, fontSize: 13, color: MILL_SEAFOAM, marginBottom: 6 }}>NOTE TO CUSTOMER</div>
-          <p style={{ fontSize: 14, color: "#1a3a2a", lineHeight: 1.6, margin: 0 }}>{result.customerNotes}</p>
+          {isEditing
+            ? <textarea rows={5} style={editTA} value={draft.customerNotes || ""} onChange={e => setField("customerNotes", e.target.value)} />
+            : <p style={{ fontSize: 14, color: "#1a3a2a", lineHeight: 1.6, margin: 0 }}>{r.customerNotes}</p>
+          }
         </div>
       </div>
     </div>
@@ -979,6 +1086,10 @@ export default function MillSoilAgent() {
           storeName={selectedStoreName}
           onBack={() => setActiveReport(null)}
           onReset={reset}
+          onSaveEdits={(updated) => {
+            updateQueueItem(activeReport.id, { result: updated });
+            setActiveReport(prev => ({ ...prev, result: updated }));
+          }}
         />
       </div>
     );
