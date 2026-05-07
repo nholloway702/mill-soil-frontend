@@ -426,10 +426,15 @@ function ReportDetail({ item, segmentLabel, storeName, onBack, onReset, onSaveEd
 
         @page {
           margin: 0.75in;
-          size: auto;
+          size: letter;
         }
 
         @media print {
+          /* Remove browser header/footer (date, time, URL, page title) */
+          @page {
+            margin: 0.75in;
+          }
+
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
 
           .no-print { display: none !important; }
