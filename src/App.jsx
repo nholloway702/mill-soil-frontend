@@ -62,7 +62,7 @@ const CONTEXT_FIELDS = {
   garden: [
     { key: "garden_size", label: "Garden size (sq ft)", type: "number", placeholder: "e.g. 500" },
     { key: "garden_type", label: "Type of garden", type: "select", options: ["Vegetable garden", "Flower bed", "Raised bed", "Mixed ornamental", "Herb garden", "Mixed vegetables & flowers"] },
-    { key: "crops", label: "What are you growing?", type: "text", placeholder: "e.g. Tomatoes, peppers, corn, mixed vegetables, perennials" },
+    { key: "crops", label: "What are you growing?", type: "text", placeholder: "e.g. Tomatoes, peppers, corn, blueberries, strawberries, raspberries, apple trees, mixed vegetables, perennials, flower beds" },
     { key: "tillage", label: "Tillage plan", type: "select", options: ["Yes — rototilling before planting", "No — no-till / direct seed", "Raised bed with new soil mix", "Lightly hand-worked"] },
     { key: "soil_texture", label: "Soil texture", type: "select", options: ["Sandy / light", "Loam / average", "Clay / heavy", "Unknown"] },
     { key: "goals", label: "Goals", type: "text", placeholder: "e.g. Improve yield, fix soil, starting new bed, organic preferred" },
