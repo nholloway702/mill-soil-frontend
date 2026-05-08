@@ -869,6 +869,20 @@ export default function MillSoilAgent() {
   const [activeReport, setActiveReport] = useState(null); // item showing full report
   const fileRef = useRef();
 
+  // ── access code gate (session-only, not persisted) ─────────────────────────
+  const [unlocked, setUnlocked] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState(false);
+
+  const submitAccessCode = () => {
+    if (accessCode === "6111") {
+      setUnlocked(true);
+      setAccessError(false);
+    } else {
+      setAccessError(true);
+    }
+  };
+
   const segmentLabel = SEGMENTS.find(s => s.id === segment)?.label || "";
   const selectedStoreName = STORES.find(s => s.id === selectedStore)?.name || "";
   const fields = CONTEXT_FIELDS[segment] || [];
@@ -1119,6 +1133,47 @@ export default function MillSoilAgent() {
           onApprove={() => { setActiveReport(reviewItem); setReviewItem(null); }}
           onReject={reset}
         />
+      </div>
+    );
+  }
+
+  // ── access code gate ───────────────────────────────────────────────────────
+
+  if (!unlocked) {
+    return (
+      <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", maxWidth: 400, margin: "80px auto", padding: "0 20px" }}>
+        <div style={{ textAlign: "center", marginBottom: 28, paddingBottom: 16, borderBottom: `2px solid ${MILL_GREEN}` }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: MILL_GREEN, margin: 0 }}>Soil Analysis Agent</h1>
+          <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0 0" }}>The Mill</p>
+        </div>
+        <div style={{ background: "white", border: `1.5px solid ${MILL_BORDER}`, borderRadius: 10, padding: "28px 24px" }}>
+          <label htmlFor="access-code" style={{ display: "block", fontSize: 13, fontWeight: 600, color: MILL_GREEN, marginBottom: 8 }}>
+            Enter access code
+          </label>
+          <input
+            id="access-code"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoFocus
+            autoComplete="off"
+            value={accessCode}
+            onChange={e => { setAccessCode(e.target.value); if (accessError) setAccessError(false); }}
+            onKeyDown={e => { if (e.key === "Enter") submitAccessCode(); }}
+            style={{ ...inputStyle, fontSize: 16, padding: "11px 14px", letterSpacing: 2, textAlign: "center" }}
+          />
+          {accessError && (
+            <p style={{ color: "#c0392b", fontSize: 13, marginTop: 10, marginBottom: 0 }}>
+              Incorrect code — please try again
+            </p>
+          )}
+          <button
+            style={{ ...btnPrimary, width: "100%", marginTop: 16 }}
+            onClick={submitAccessCode}
+          >
+            Submit
+          </button>
+        </div>
       </div>
     );
   }
