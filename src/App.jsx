@@ -7,6 +7,8 @@ const MILL_GOLD = "#9a7209";
 const MILL_GOLD_LIGHT = "#fdf6e3";
 const MILL_SEAFOAM = "#4a7c5e";
 const MILL_SEAFOAM_LIGHT = "#d6ebe0";
+const MILL_HUNTER = "#4a5d2a";
+const MILL_HUNTER_LIGHT = "#ecefdc";
 const MILL_BORDER = "#c8d8ca";
 
 const STORES = [
@@ -26,6 +28,7 @@ const SEGMENTS = [
   { id: "equine", label: "Equine & Livestock", sub: "Pasture management" },
   { id: "agronomy", label: "Agronomy", sub: "Row crop & farm fields" },
   { id: "garden", label: "Garden", sub: "Vegetable gardens, flower beds, raised beds & ornamentals — not for lawn care", fullWidth: true },
+  { id: "food_plot", label: "Food Plot / Wildlife", sub: "Food plots, wildlife habitat, and deer management", fullWidth: true, accent: MILL_HUNTER, accentLight: MILL_HUNTER_LIGHT },
 ];
 
 const CONTEXT_FIELDS = {
@@ -67,16 +70,23 @@ const CONTEXT_FIELDS = {
     { key: "soil_texture", label: "Soil texture", type: "select", options: ["Sandy / light", "Loam / average", "Clay / heavy", "Unknown"] },
     { key: "goals", label: "Goals", type: "text", placeholder: "e.g. Improve yield, fix soil, starting new bed, organic preferred" },
   ],
+  food_plot: [
+    { key: "plot_size", label: "Plot size (acres)", placeholder: "e.g. 2 acres" },
+    { key: "intended_species", label: "What are you planting?", placeholder: "e.g. Clover, brassicas, soybeans, cereal grains" },
+    { key: "existing_vegetation", label: "Current plot condition", placeholder: "e.g. Bare ground, established clover, weedy field" },
+    { key: "planting_season", label: "Planting season / timing", placeholder: "e.g. Late summer cool-season, spring warm-season" },
+  ],
 };
 
 // ─── shared styles ────────────────────────────────────────────────────────────
 
-const segStyle = (selected) => ({
-  border: `1.5px solid ${selected ? MILL_GREEN : MILL_BORDER}`,
+const segStyle = (selected, accent, accentLight) => ({
+  border: `1.5px solid ${selected ? (accent || MILL_GREEN) : MILL_BORDER}`,
   borderRadius: 10,
   padding: "14px 16px",
   cursor: "pointer",
-  background: selected ? MILL_GREEN_LIGHT : "white",
+  background: selected ? (accentLight || MILL_GREEN_LIGHT) : "white",
+  boxShadow: accent ? `inset 0 3px 0 0 ${accent}` : "none",
   transition: "all .15s",
   textAlign: "left",
 });
@@ -1228,10 +1238,10 @@ export default function MillSoilAgent() {
             {SEGMENTS.map(s => (
               <div
                 key={s.id}
-                style={{ ...segStyle(segment === s.id), ...(s.fullWidth ? { gridColumn: "1 / -1" } : {}) }}
+                style={{ ...segStyle(segment === s.id, s.accent, s.accentLight), ...(s.fullWidth ? { gridColumn: "1 / -1" } : {}) }}
                 onClick={() => setSegment(s.id)}
               >
-                <div style={{ fontWeight: 700, fontSize: 14, color: s.fullWidth ? MILL_SEAFOAM : MILL_GREEN }}>{s.label}</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: s.accent || (s.fullWidth ? MILL_SEAFOAM : MILL_GREEN) }}>{s.label}</div>
                 <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>{s.sub}</div>
               </div>
             ))}
