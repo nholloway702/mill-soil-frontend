@@ -27,8 +27,8 @@ const SEGMENTS = [
   { id: "turf", label: "Turf / Contractor", sub: "Commercial turf management" },
   { id: "equine", label: "Equine & Livestock", sub: "Pasture management" },
   { id: "agronomy", label: "Agronomy", sub: "Row crop & farm fields" },
-  { id: "garden", label: "Garden", sub: "Vegetable gardens, flower beds, raised beds & ornamentals — not for lawn care", fullWidth: true },
-  { id: "food_plot", label: "Food Plot / Wildlife", sub: "Food plots, wildlife habitat, and deer management", fullWidth: true, accent: MILL_HUNTER, accentLight: MILL_HUNTER_LIGHT },
+  { id: "garden", label: "Garden", sub: "Vegetable gardens, flower beds, raised beds & ornamentals — not for lawn care" },
+  { id: "food_plot", label: "Food Plot / Wildlife", sub: "Food plots, wildlife habitat, and deer management", accent: MILL_HUNTER, accentLight: MILL_HUNTER_LIGHT },
 ];
 
 const CONTEXT_FIELDS = {
